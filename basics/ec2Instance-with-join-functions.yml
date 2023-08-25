@@ -1,0 +1,9 @@
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-053b0d53c279acc90
+      InstanceType: t3.micro
+      Tags:
+        - Key: Name
+          Value: !Join ["-",[my,test,ec2,instance] ]
