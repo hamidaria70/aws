@@ -1,0 +1,31 @@
+Mappings:
+  RegionMap:
+    us-east-1:
+      ID: ami-08a52ddb321b32a8c
+
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref AWS::Region
+        - ID
+      InstanceType: t3.micro
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - "VM on "
+              - !Ref AWS::Region
+      SecurityGroups:
+        - !Ref MySecurityGroup
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH on port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
