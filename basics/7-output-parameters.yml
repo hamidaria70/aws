@@ -1,0 +1,46 @@
+Parameters:
+  NameOfService:
+    Description: "Name of service"
+    Type: String
+  KeyName:
+    Description: "Name of existing keypair"
+    Type: AWS::EC2::KeyPair::KeyName
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      ID: ami-08a52ddb321b32a8c
+
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref AWS::Region
+        - ID
+      InstanceType: t2.micro
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref NameOfService
+              - !Ref AWS::Region
+      KeyName: !Ref KeyName
+      SecurityGroups:
+        - !Ref MySecurityGroup
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH on port 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  ServerDNS:
+    Value: !GetAtt
+      - Ec2Instance
+      - PublicDnsName
