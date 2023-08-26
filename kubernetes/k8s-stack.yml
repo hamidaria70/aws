@@ -5,4 +5,14 @@ Resources:
       Tags:
         - Key: Name
           Value: kubernetes-vpc
-      CidrBlock: 10.0.0.0/25
+      CidrBlock: 10.0.0.0/16
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-subnet
+    VpcId: !Ref AWS::EC2::VPC::Id
+    AvailibiltyZone: us-east-1
+    CidrBlock: 10.0.1.0/24
+
