@@ -1,0 +1,54 @@
+Parameters:
+  NameOfService:
+    Description: "Name of service"
+    Type: String
+  KeyName:
+    Description: "Name of existing keypair"
+    Type: AWS::EC2::KeyPair::KeyName
+  VpcId:
+    Description: "Enter the VPC ID"
+    Type: AWS::EC2::VPC::Id
+  SubnetId:
+    Description: "Enter the subnet ID"
+    Type: AWS::EC2::Subnet::Id
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      ID: ami-08a52ddb321b32a8c
+
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref AWS::Region
+        - ID
+      InstanceType: t2.micro
+      SubnetId: !Ref SubnetId
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref NameOfService
+              - !Ref AWS::Region
+      KeyName: !Ref KeyName
+      SecurityGroups:
+        - !Ref MySecurityGroup
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open port 80
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  ServerDNS:
+    Value: !GetAtt
+      - Ec2Instance
+      - PublicDnsName
