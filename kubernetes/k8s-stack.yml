@@ -1,0 +1,8 @@
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-vpc
+      CidrBlock: 10.0.0.0/25
