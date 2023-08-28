@@ -41,5 +41,9 @@ Resources:
       Tags:
         - Key: Name
           Value: kubernetes-route-table
-
-
+  Routes:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
