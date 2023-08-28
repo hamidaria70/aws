@@ -12,7 +12,6 @@ Resources:
       Tags:
         - Key: Name
           Value: kubernetes-subnet
-    VpcId: !Ref AWS::EC2::VPC::Id
-    AvailibiltyZone: us-east-1
-    CidrBlock: 10.0.1.0/24
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
 
