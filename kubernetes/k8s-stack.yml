@@ -6,13 +6,32 @@ Resources:
         - Key: Name
           Value: kubernetes-vpc
       CidrBlock: 10.0.0.0/16
-  Subnet:
+  SubnetPublic:
     Type: AWS::EC2::Subnet
     Properties:
       Tags:
         - Key: Name
-          Value: kubernetes-subnet
+          Value: kubernetes-subnet-public
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
       MapPublicIpOnLaunch: true
+  SubnetPrivate:
+    Type: AWS::EC2::Subnet
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-subnet-pirvate
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-internet-gateway
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
 
