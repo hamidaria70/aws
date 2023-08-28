@@ -62,21 +62,31 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: myInstance
-      InstanceType: t3.2xlarge
+          Value: pub-myInstance
+      InstanceType: t2.medium
       ImageId: ami-053b0d53c279acc90
-      SubnetId: !Ref SubnetPublic
       KeyName: !Ref KeyName
-      SecurityGroupId:
+      SubnetId: !Ref SubnetPublic
+      SecurityGroupIds:
         - !Ref SecurityGroup
-      SecurityGroups:
+  Ec2Priv:
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags:
+        - Key: Name
+          Value: priv-myInstance
+      InstanceType: t2.medium
+      ImageId: ami-053b0d53c279acc90
+      KeyName: !Ref KeyName
+      SubnetId: !Ref SubnetPrivate
+      SecurityGroupIds:
         - !Ref SecurityGroup
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Open ports 22
-      GroupName: public-group
+      GroupName: public-sg
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
