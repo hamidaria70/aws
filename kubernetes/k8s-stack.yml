@@ -22,14 +22,6 @@ Resources:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
       MapPublicIpOnLaunch: true
-  SubnetPrivate:
-    Type: AWS::EC2::Subnet
-    Properties:
-      Tags:
-        - Key: Name
-          Value: kubernetes-subnet-pirvate
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -87,9 +79,9 @@ Resources:
         InstanceType: t2.medium
         ImageId: ami-053b0d53c279acc90
         KeyName: !Ref KeyName
-        SubnetId: !Ref SubnetPrivate
+        SubnetId: !Ref SubnetPublic
         SecurityGroupIds:
-          - !Ref SecurityGroup
+          - !Ref SecurityGroupPrivate
 
   'Fn::ForEach::WorkerInstances':
   - Identifier
@@ -106,9 +98,9 @@ Resources:
         InstanceType: t2.medium
         ImageId: ami-053b0d53c279acc90
         KeyName: !Ref KeyName
-        SubnetId: !Ref SubnetPrivate
+        SubnetId: !Ref SubnetPublic
         SecurityGroupIds:
-          - !Ref SecurityGroup
+          - !Ref SecurityGroupPrivate
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -124,3 +116,22 @@ Resources:
       Tags:
         - Key: Name
           Value: public-sg
+
+  SecurityGroupPrivate:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Internet
+      GroupName: private-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 3.80.106.168/32
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: private-sg
