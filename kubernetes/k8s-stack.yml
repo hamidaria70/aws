@@ -1,0 +1,137 @@
+Transform: 'AWS::LanguageExtensions'
+
+Parameters:
+  KeyName:
+    Description: "Name of existing keypair"
+    Type: AWS::EC2::KeyPair::KeyName
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-vpc
+      CidrBlock: 10.0.0.0/16
+  SubnetPublic:
+    Type: AWS::EC2::Subnet
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-subnet-public
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: kubernetes-internet-gateway
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: kubernetes-route-table
+  Routes:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  RouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetPublic
+  Ec2:
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags:
+        - Key: Name
+          Value: pub-myInstance
+      InstanceType: t2.medium
+      ImageId: ami-053b0d53c279acc90
+      KeyName: !Ref KeyName
+      SubnetId: !Ref SubnetPublic
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+
+  'Fn::ForEach::MasterInstances':
+  - Identifier
+  - ["1", "2", "3"]
+  - 'MasterNode${Identifier}':
+      Type: AWS::EC2::Instance
+      Properties:
+        Tags:
+          - Key: Name
+            Value: !Join
+              - "-"
+              - - "master-node"
+                - !Ref Identifier
+        InstanceType: t2.medium
+        ImageId: ami-053b0d53c279acc90
+        KeyName: !Ref KeyName
+        SubnetId: !Ref SubnetPublic
+        SecurityGroupIds:
+          - !Ref SecurityGroupPrivate
+
+  'Fn::ForEach::WorkerInstances':
+  - Identifier
+  - ["1", "2"]
+  - 'WorkerNode${Identifier}':
+      Type: AWS::EC2::Instance
+      Properties:
+        Tags:
+          - Key: Name
+            Value: !Join
+              - "-"
+              - - "worker-node"
+                - !Ref Identifier
+        InstanceType: t2.medium
+        ImageId: ami-053b0d53c279acc90
+        KeyName: !Ref KeyName
+        SubnetId: !Ref SubnetPublic
+        SecurityGroupIds:
+          - !Ref SecurityGroupPrivate
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open ports 22
+      GroupName: public-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: public-sg
+
+  SecurityGroupPrivate:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Internet
+      GroupName: private-sg
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 3.80.106.168/32
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: private-sg
