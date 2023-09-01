@@ -72,12 +72,37 @@ Resources:
       SecurityGroupIds:
         - !Ref SecurityGroup
 
-  'Fn::ForEach::Instances':
+  'Fn::ForEach::MasterInstances':
   - Identifier
   - ["1", "2", "3"]
   - 'MasterNode${Identifier}':
       Type: AWS::EC2::Instance
       Properties:
+        Tags:
+          - Key: Name
+            Value: !Join
+              - "-"
+              - - "master-node"
+                - !Ref Identifier
+        InstanceType: t2.medium
+        ImageId: ami-053b0d53c279acc90
+        KeyName: !Ref KeyName
+        SubnetId: !Ref SubnetPrivate
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+
+  'Fn::ForEach::WorkerInstances':
+  - Identifier
+  - ["1", "2"]
+  - 'WorkerNode${Identifier}':
+      Type: AWS::EC2::Instance
+      Properties:
+        Tags:
+          - Key: Name
+            Value: !Join
+              - "-"
+              - - "worker-node"
+                - !Ref Identifier
         InstanceType: t2.medium
         ImageId: ami-053b0d53c279acc90
         KeyName: !Ref KeyName
