@@ -1,6 +1,6 @@
 # Elastic Kubernetes Service
 
-##To run eks follow along:
+## To run eks follow along:
 
 ### Create Role
 
