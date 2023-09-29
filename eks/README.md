@@ -93,3 +93,34 @@ after a while, you will see something like this message az the end of the logs o
 `2023-09-29 17:06:39 [✔]  EKS cluster "mycluster" in "us-east-1" region is ready`
 
 and also the `kubeconfig` file will be located at `$HOME/.kube/config` automatically.
+
+#### Create AWS Loadbalancer
+
+Next step is to create a `loadbalancer` in order to client be able to send their request from the internet.
+
+***Note: AWS Loadbalancer is something like ingress nginx controller***
+
+Run the following commands:
+
+1. Adding `eks-chart` helm repository.
+   
+   ```
+   helm repo add eks https://aws.github.io/eks-charts
+   ```
+2. Installing the `aws-loadbalancer-controller`
+
+   ```
+   helm upgrade --install \
+     -n kube-system \
+     --set clusterName=eks-acg \
+     --set serviceAccount.create=true \
+     aws-load-balancer-controller eks/aws-load-balancer-controller
+   ``` 
+3. Now, it is time to deploy an `IAM` policy in our AWS space: 
+
+   ```
+   aws cloudformation deploy \
+       --stack-name aws-load-balancer-iam-policy \
+       --template-file iam-policy.yaml \
+       --capabilities CAPABILITY_IAM
+   ```
