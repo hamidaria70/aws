@@ -103,24 +103,40 @@ Next step is to create a `loadbalancer` in order to client be able to send their
 Run the following commands:
 
 1. Adding `eks-chart` helm repository.
-   
-   ```
-   helm repo add eks https://aws.github.io/eks-charts
-   ```
+    
+    ```
+    helm repo add eks https://aws.github.io/eks-charts
+    ```
 2. Installing the `aws-loadbalancer-controller`
 
-   ```
-   helm upgrade --install \
-     -n kube-system \
-     --set clusterName=eks-acg \
-     --set serviceAccount.create=true \
-     aws-load-balancer-controller eks/aws-load-balancer-controller
-   ``` 
+    ```
+    helm upgrade --install \
+      -n kube-system \
+      --set clusterName=eks-acg \
+      --set serviceAccount.create=true \
+      aws-load-balancer-controller eks/aws-load-balancer-controller
+    ``` 
 3. Now, it is time to deploy an `IAM` policy in our AWS space: 
 
-   ```
-   aws cloudformation deploy \
-       --stack-name aws-load-balancer-iam-policy \
-       --template-file iam-policy.yaml \
-       --capabilities CAPABILITY_IAM
-   ```
+    ```
+    aws cloudformation deploy \
+        --stack-name aws-load-balancer-iam-policy \
+        --template-file iam-policy.yaml \
+        --capabilities CAPABILITY_IAM
+    ```
+
+the point is that the `AWS loadbalancer controller` will not work with the policy that we created a few moments ago. So we have to attach the iam policy to the worker nodes iam role.
+
+4. Finding policy name by running this command:
+
+    ```
+    aws cloudformation describe-stacks \
+        --stack-name aws-load-balancer-iam-policy \
+        --query "Stacks[0].Outputs[0]" \
+        | jq .OutputValue \
+        | tr -d '"' \
+        | cut -d "/" -f 2
+    ```
+
+//TODO: attaching iam role to workernodes
+5. 
