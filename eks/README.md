@@ -134,9 +134,26 @@ the point is that the `AWS loadbalancer controller` will not work with the polic
         --stack-name aws-load-balancer-iam-policy \
         --query "Stacks[0].Outputs[0]" \
         | jq .OutputValue \
+        | tr -d '"'
+    ```
+
+5. Getting the `IAM Identity` of the eks cluster by running:
+
+
+    ```
+    eksctl get iamidentitymapping \
+        --cluster mycluster \
+        --output json \
+        | jq .[].rolearn \
         | tr -d '"' \
         | cut -d "/" -f 2
     ```
 
-//TODO: attaching iam role to workernodes
-5. 
+6. Now, we should attach the `policy` in number 5 to the `Role` in number
+   6, so run the following command:
+
+    ```
+    aws iam attach-role-policy \
+        --role-name <OUTPUT OF NUMBER 5> \
+        --policy-arn <OUTPUT OF NUMBER 4>
+    ```
