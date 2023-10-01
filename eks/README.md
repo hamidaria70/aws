@@ -2,6 +2,13 @@
 
 ## To run eks follow along:
 
+Make sure that you have installed `AWS CLI` and `eksctl` then go ahead step by
+step or you can run the script.
+
+```
+./run-cluster.sh
+```
+
 ### Create Role
 
 #### To create your Amazon EKS cluster role in the IAM console
@@ -64,6 +71,8 @@ For more information click [here](https://docs.aws.amazon.com/eks/latest/usergui
 #### Create EKS cluster using eksctl
 
 1. To install `eksctl` run the following commands:
+
+If you installed it before, skip this step.
 
 ```
 curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
