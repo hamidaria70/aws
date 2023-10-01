@@ -96,7 +96,8 @@ and also the `kubeconfig` file will be located at `$HOME/.kube/config` automatic
 
 #### Create AWS Loadbalancer
 
-Next step is to create a `loadbalancer` in order to client be able to send their request from the internet.
+Next step is to create a `loadbalancer` in order to client be able to send 
+their request from the internet.
 
 ***Note: AWS Loadbalancer is something like ingress nginx controller***
 
@@ -125,7 +126,9 @@ Run the following commands:
         --capabilities CAPABILITY_IAM
     ```
 
-the point is that the `AWS loadbalancer controller` will not work with the policy that we created a few moments ago. So we have to attach the iam policy to the worker nodes iam role.
+the point is that the `AWS loadbalancer controller` will not work with the 
+policy that we created a few moments ago. So we have to attach the iam policy 
+to the worker nodes iam role.
 
 4. Finding policy name by running this command:
 
@@ -157,3 +160,28 @@ the point is that the `AWS loadbalancer controller` will not work with the polic
         --role-name <OUTPUT OF NUMBER 5> \
         --policy-arn <OUTPUT OF NUMBER 4>
     ```
+
+7. Final step is to test the cluster. So we should deploy a sample app like 
+nginx in cluster. But first we are going to find out the `DNSName` of the ELB,
+when it is ready. In order to find the loadbalancer of the cluster node run the
+following commands:
+
+    1. At first, we need to get the `vpcId` of the cluster:
+
+        ```
+        aws eks describe-cluster \
+            --name mycluster \
+            --query "cluster.resourcesVpcConfig.vpcId" \
+            | tr -d '"'
+        ```
+    2. Then, we should get the `DNSName` of the `Loadbalancer`:
+
+        ```
+        aws elbv2 describe-load-balancers \
+            --query 'LoadBalancers[?VPCId=="<VPC FROM THE LAST COMMAND>"]|[]' \
+            | jq .[].DNSName \
+            | tr -d '"'
+        ```
+
+Now, Open a browser and paste the `DNSName` in it. If everything is ok , you
+will see the nginx welcome page.
