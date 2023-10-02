@@ -7,7 +7,7 @@ REGION=us-east-1
 CLUSTER_VERSION=1.27
 CIDR=10.0.0.0/16
 NODEGROUP_NAME=mycluster-node-group
-TYPE=t3.micro
+TYPE=t3.medium
 PRIVATE_NETWORK=true
 VOLUME_SIZE=30
 MINIMUM_NODE=3
@@ -25,7 +25,8 @@ eksctl create cluster --name=$CLUSTER_NAME \
     --node-private-networking=$PRIVATE_NETWORK \
     --node-volume-size=$VOLUME_SIZE \
     --nodes-min=$MINIMUM_NODE \
-    --vpc-nat-mode=$NAT_MODE
+    --vpc-nat-mode=$NAT_MODE \
+	--zones "us-east-1a,us-east-1b,us-east-1c"
 
 echo "Deploying sample application..."
 helm install sample-app test 
