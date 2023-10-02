@@ -195,3 +195,8 @@ following commands:
 
 Now, Open a browser and paste the `DNSName` in it. If everything is ok , you
 will see the nginx welcome page.
+
+This is the end of creating EKS cluster in AWS. For more information and other
+steps click down below:
+
+* [ssl-certificate.md](./ssl-certificate.md) 
