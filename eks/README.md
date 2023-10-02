@@ -90,11 +90,12 @@ eksctl create cluster --name=mycluster \
     --version=1.27 \
     --vpc-cidr=10.0.0.0/16 \
     --nodegroup-name=mycluster-node-group \
-    --instance-types=t3.micro \
+    --instance-types=t3.medium \
     --node-private-networking=true \
     --node-volume-size=30 \
     --nodes-min=3 \
-    --vpc-nat-mode=HighlyAvailable
+    --vpc-nat-mode=HighlyAvailable \
+    --zones "us-east-1a,us-east-1b,us-east-1c"
 ```
 
 after a while, you will see something like this message az the end of the logs on screen:
