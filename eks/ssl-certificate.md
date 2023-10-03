@@ -16,7 +16,8 @@ structure step by step:
     aws acm request-certificate \
         --domain-name *.cmcloudlab367.info \
         --subject-alternative-names cmcloudlab367.info \
-        --validation-method DNS
+        --validation-method DNS \
+        --tags Key=Name,Value=cmcloudlab367.info
     ```
 
 3. Now, we should change ingress of the cluster, to do so all you need to do is
@@ -55,4 +56,37 @@ In order to find the loadbalancer of the cluster node run the following commands
         --load-balancer-arn <LOADBALANCER ARN FROM THE LAST COMMAND>
     ```
 
-6.
+6. Get the `ListenerArn` of the one which is listen on `443` or `HTTPS`
+   protocol.
+
+    ```
+    aws elbv2 describe-listeners \
+        --load-balancer-arn <LOADBALANCER ARN FROM THE LAST COMMAND> \
+        --query "Listeners[0].ListenerArn"
+    ```
+
+7. Get the `HostHeaderConfig` of the rule, in order to set it on `Route53`, by
+   running the:
+
+    ```
+    aws elbv2 describe-rules \
+        --listener-arn <LISTENER ARM FROM THE LAST COMMAND> \
+        --query "Rules[].Conditions[].HostHeaderConfig.Values"
+    ```
+
+8. Follow these bulletpoints to set a recored in `Route53` for accessing the
+   application securely.
+
+    * In the AWS console go to route53
+    * Click on `HostedZones`
+    * Click on your domain
+    * Click on `Create Record`
+    * In `Quick create record` under the `Record Name` type your subdomain
+        name. In our case is `sample-app`.
+    * Turn on the `Alias` button
+    * Choose `Alias to Application and Classic Load Balancer` as an endpoint
+    * Select your region in next drop-down
+    * Select your load balancer
+    * In the last click on `Create Records`
+
+    Open the browser and brows for your domain, it has to be secure over https.
