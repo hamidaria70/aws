@@ -28,65 +28,102 @@ structure step by step:
    ./run-with-ssl.sh
    ```
 
-4. we are going to find out the `LoadBalancerArn` of the ELB, when it is ready.
-In order to find the loadbalancer of the cluster node run the following commands:
+4. To set DNS record we have 2 choices:
 
-    * At first, we need to get the vpcId of the cluster:
+    ### Autimatically
 
-    ```
-    aws eks describe-cluster \
-        --name mycluster \
-        --query "cluster.resourcesVpcConfig.vpcId" \
-        | tr -d '"'
-    ```
-
-    * Then, we should get the LoadBalancerArn of the Loadbalancer:
+    1. Get worker nodes role:
 
     ```
-    aws elbv2 describe-load-balancers \
-        --query 'LoadBalancers[?VPCId=="<VPC FROM THE LAST COMMAND>"]|[]' \
-        | jq .[].LoadBalancerArn \
-        | tr -d '"'
+    eksctl get iamidentitymapping \
+        --cluster mycluster \
+        --output json \
+        | jq .[].rolearn \
+        | tr -d '"' \
+        | cut -d "/" -f 2
     ```
 
-5. For checking the result, we can check the `listeners` in the loadbalancer:
+    2. Give full access of `route53` to the worker nodes role:
 
     ```
-    aws elbv2 describe-listeners \
-        --load-balancer-arn <LOADBALANCER ARN FROM THE LAST COMMAND>
+    aws iam attach-role-policy \
+        --role-name <ROLE NAME OF PREVIOUS COMMAND> \
+        --policy-arn arn:aws:iam::aws:policy/AmazonRoute53FullAccess
     ```
 
-6. Get the `ListenerArn` of the one which is listen on `443` or `HTTPS`
-   protocol.
+    3. Installing the `external dns tooling`:
 
     ```
-    aws elbv2 describe-listeners \
-        --load-balancer-arn <LOADBALANCER ARN FROM THE LAST COMMAND> \
-        --query "Listeners[0].ListenerArn"
+    helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+    helm upgrade --install external-dns external-dns/external-dns
     ```
 
-7. Get the `HostHeaderConfig` of the rule, in order to set it on `Route53`, by
-   running the:
+    Make sure that the `external-dns` pod is up and running.
 
-    ```
-    aws elbv2 describe-rules \
-        --listener-arn <LISTENER ARM FROM THE LAST COMMAND> \
-        --query "Rules[].Conditions[].HostHeaderConfig.Values"
-    ```
+    4. From the console check the `hostedzones` in `route53`. you will see your
+       dns record. In the end open a browser and call your domain.
 
-8. Follow these bulletpoints to set a recored in `Route53` for accessing the
-   application securely.
+    ### Manually
 
-    * In the AWS console go to route53
-    * Click on `HostedZones`
-    * Click on your domain
-    * Click on `Create Record`
-    * In `Quick create record` under the `Record Name` type your subdomain
-        name. In our case is `sample-app`.
-    * Turn on the `Alias` button
-    * Choose `Alias to Application and Classic Load Balancer` as an endpoint
-    * Select your region in next drop-down
-    * Select your load balancer
-    * In the last click on `Create Records`
+    1. we are going to find out the `LoadBalancerArn` of the ELB, when it is ready.
+    In order to find the loadbalancer of the cluster node run the following commands:
+    
+        * At first, we need to get the vpcId of the cluster:
+    
+        ```
+        aws eks describe-cluster \
+            --name mycluster \
+            --query "cluster.resourcesVpcConfig.vpcId" \
+            | tr -d '"'
+        ```
+    
+        * Then, we should get the LoadBalancerArn of the Loadbalancer:
+    
+        ```
+        aws elbv2 describe-load-balancers \
+            --query 'LoadBalancers[?VPCId=="<VPC FROM THE LAST COMMAND>"]|[]' \
+            | jq .[].LoadBalancerArn \
+            | tr -d '"'
+        ```
+ 
+    2. For checking the result, we can check the `listeners` in the loadbalancer:
+    
+        ```
+        aws elbv2 describe-listeners \
+            --load-balancer-arn <LOADBALANCER ARN FROM THE LAST COMMAND>
+        ```
+ 
+    3. Get the `ListenerArn` of the one which is listen on `443` or `HTTPS`
+       protocol.
+    
+        ```
+        aws elbv2 describe-listeners \
+            --load-balancer-arn <LOADBALANCER ARN FROM THE LAST COMMAND> \
+            --query "Listeners[0].ListenerArn"
+        ```
 
-    Open the browser and brows for your domain, it has to be secure over https.
+    4. Get the `HostHeaderConfig` of the rule, in order to set it on `Route53`, by
+       running the:
+    
+        ```
+        aws elbv2 describe-rules \
+            --listener-arn <LISTENER ARM FROM THE LAST COMMAND> \
+            --query "Rules[].Conditions[].HostHeaderConfig.Values"
+        ```
+    
+    5. Follow these bulletpoints to set a recored in `Route53` for accessing the
+       application securely.
+    
+        * In the AWS console go to route53
+        * Click on `HostedZones`
+        * Click on your domain
+        * Click on `Create Record`
+        * In `Quick create record` under the `Record Name` type your subdomain
+            name. In our case is `sample-app`.
+        * Turn on the `Alias` button
+        * Choose `Alias to Application and Classic Load Balancer` as an endpoint
+        * Select your region in next drop-down
+        * Select your load balancer
+        * In the last click on `Create Records`
+    
+        Open the browser and brows for your domain, it has to be secure over https.
