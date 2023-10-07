@@ -199,4 +199,5 @@ will see the nginx welcome page.
 This is the end of creating EKS cluster in AWS. For more information and other
 steps click down below:
 
-* [ssl-certificate.md](./ssl-certificate.md) 
+* [SSL Certificate](./ssl-certificate.md) 
+* [More Power for Less Money](./more-power-for-lesss-money.md) 
