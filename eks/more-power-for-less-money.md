@@ -81,3 +81,7 @@ eksctl create fargateprofile \
     --namespace <TARGET NAMESPACE> \
     --cluster <CLUSTER NAME>
 ```
+
+Now, for scheduling pods in target namespace/namespaces you need to restart the
+pod/deployment and then you will see that new `fargate` nodes will be created
+and pod will be up and running.
