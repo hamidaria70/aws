@@ -200,4 +200,5 @@ This is the end of creating EKS cluster in AWS. For more information and other
 steps click down below:
 
 * [SSL Certificate](./ssl-certificate.md) 
-* [More Power for Less Money](./more-power-for-less-money.md) 
+* [More Power for Less Money](./more-power-for-less-money.md)
+* [CI/CD](./cicd.md)
